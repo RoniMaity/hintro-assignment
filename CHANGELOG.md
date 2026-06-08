@@ -5,7 +5,7 @@
 ### Features Built
 - **Auth System:** Built a custom JWT registration and login flow.
 - **Meeting APIs:** Created CRUD routes to manage meetings and store their transcript segments.
-- **AI Integration:** Plugged in the Gemini API to analyze the meetings and extract decisions and action items.
+- **AI Integration:** Plugged in the Grok-2 API to analyze the meetings and extract decisions and action items.
 - **Hallucination Guards:** Wrote a custom validator (using Levenshtein distance) to drop AI outputs that couldn't be strictly mapped back to actual transcript timestamps.
 - **Action Item Tracker:** Added endpoints to update action item statuses (Pending, In Progress, Completed).
 - **Slack Reminders:** Wrote a `node-cron` script that wakes up every 15 minutes, checks Postgres for overdue items, and fires a formatted Slack Webhook alert.

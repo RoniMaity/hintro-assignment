@@ -2,7 +2,7 @@
 
 Hey! This is my submission for the Hintro Backend/Fullstack Engineering Internship Assignment. 
 
-It's an AI-powered meeting intelligence API that takes meeting transcripts, feeds them to Gemini, and extracts actionable insights and tasks. The coolest part is that it forces the AI to provide exact timestamps for every claim it makes, and the server validates those timestamps to completely eliminate AI hallucinations.
+It's an AI-powered meeting intelligence API that takes meeting transcripts, feeds them to Grok-2 (via xAI), and extracts actionable insights and tasks. The coolest part is that it forces the AI to provide exact timestamps for every claim it makes, and the server validates those timestamps to completely eliminate AI hallucinations.
 
 ## Quick Setup
 
@@ -23,7 +23,7 @@ If you want to run this locally to test it out, here's how:
    JWT_SECRET="super_secret_key"
 
    # AI Integration
-   GEMINI_API_KEY="your_google_gemini_key"
+   GROK_API_KEY="your_xai_grok_api_key"
 
    # Slack Webhook for Overdue Reminders
    WEBHOOK_URL="https://hooks.slack.com/services/YOUR/WEBHOOK"

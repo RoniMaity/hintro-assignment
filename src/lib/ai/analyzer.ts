@@ -1,4 +1,4 @@
-import { GoogleGenAI } from '@google/genai';
+import OpenAI from 'openai';
 
 export interface AnalysisResult {
   summary: string;
@@ -128,21 +128,25 @@ function chunkTranscript(
 }
 
 async function callLLM(prompt: string, systemInstruction: string, temperature: number): Promise<string> {
-  const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey) throw new Error('No GEMINI_API_KEY found');
-  const ai = new GoogleGenAI({ apiKey });
-
-  const response = await ai.models.generateContent({
-    model: 'gemini-2.0-flash',
-    contents: prompt,
-    config: {
-      systemInstruction,
-      temperature,
-      responseMimeType: 'application/json',
-    },
+  const apiKey = process.env.GROK_API_KEY;
+  if (!apiKey) throw new Error('No GROK_API_KEY found');
+  
+  const openai = new OpenAI({
+    apiKey,
+    baseURL: 'https://api.x.ai/v1',
   });
 
-  return response.text ?? '';
+  const response = await openai.chat.completions.create({
+    model: 'grok-2-latest',
+    messages: [
+      { role: 'system', content: systemInstruction },
+      { role: 'user', content: prompt }
+    ],
+    temperature,
+    response_format: { type: 'json_object' },
+  });
+
+  return response.choices[0].message.content ?? '';
 }
 
 async function executeStageWithRetry<T>(
@@ -173,8 +177,8 @@ export async function analyzeTranscript(
   segments: TranscriptSegment[],
   knownSpeakers: string[]
 ): Promise<AnalysisResult> {
-  if (!process.env.GEMINI_API_KEY) {
-    console.warn('[AI] No GEMINI_API_KEY found, returning mock analysis');
+  if (!process.env.GROK_API_KEY) {
+    console.warn('[AI] No GROK_API_KEY found, returning mock analysis');
     return generateMockAnalysis(segments, knownSpeakers);
   }
 
@@ -256,7 +260,7 @@ function generateMockAnalysis(
   const timestamps = segments.map((s) => s.timestamp);
 
   return {
-    summary: `Meeting with ${speakers.length} participants covering ${segments.length} discussion points. (This is a mock analysis — set GEMINI_API_KEY for real AI analysis.)`,
+    summary: `Meeting with ${speakers.length} participants covering ${segments.length} discussion points. (This is a mock analysis — set GROK_API_KEY for real AI analysis.)`,
     decisions: timestamps.length > 1
       ? [
           {
