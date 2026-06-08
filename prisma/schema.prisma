@@ -1,0 +1,94 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum ActionItemStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+}
+
+enum NotificationStatus {
+  SUCCESS
+  FAILED
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  name         String
+  passwordHash String   @map("password_hash")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  @@map("users")
+}
+
+model Meeting {
+  id           String               @id @default(cuid())
+  title        String
+  date         DateTime
+  participants String[]
+  createdAt    DateTime             @default(now()) @map("created_at")
+  updatedAt    DateTime             @updatedAt @map("updated_at")
+  segments     TranscriptSegment[]
+  actionItems  ActionItem[]
+  summary      String?
+  decisions    String[]             @default([])
+
+  @@map("meetings")
+}
+
+model TranscriptSegment {
+  id        String   @id @default(cuid())
+  meetingId String   @map("meeting_id")
+  speaker   String
+  timestamp String   // e.g. "04:12"
+  text      String
+  createdAt DateTime @default(now()) @map("created_at")
+
+  meeting Meeting @relation(fields: [meetingId], references: [id], onDelete: Cascade)
+
+  @@index([meetingId])
+  @@map("transcript_segments")
+}
+
+model ActionItem {
+  id                String           @id @default(cuid())
+  meetingId         String           @map("meeting_id")
+  description       String
+  assignee          String
+  status            ActionItemStatus @default(PENDING)
+  dueDate           DateTime?        @map("due_date")
+  citationTimestamp String?          @map("citation_timestamp") // e.g. "04:12"
+  createdAt         DateTime         @default(now()) @map("created_at")
+  updatedAt         DateTime         @updatedAt @map("updated_at")
+
+  meeting       Meeting           @relation(fields: [meetingId], references: [id], onDelete: Cascade)
+  notifications NotificationLog[]
+
+  @@index([meetingId])
+  @@index([status])
+  @@index([assignee])
+  @@index([dueDate])
+  @@map("action_items")
+}
+
+model NotificationLog {
+  id           String             @id @default(cuid())
+  actionItemId String             @map("action_item_id")
+  firedAt      DateTime           @default(now()) @map("fired_at")
+  channel      String             // e.g. "discord", "slack"
+  status       NotificationStatus
+  errorMessage String?            @map("error_message")
+
+  actionItem ActionItem @relation(fields: [actionItemId], references: [id], onDelete: Cascade)
+
+  @@index([actionItemId])
+  @@map("notification_logs")
+}
